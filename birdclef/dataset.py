@@ -21,6 +21,11 @@ class Sample(typing.NamedTuple):
 
 
 class Dataset:
+    """Simple Birdclef Dataset.
+
+    Note: There is no test dataset due to it being a notebook competition
+    """
+
     def __init__(self, config: Config, data_path: Path):
         self.config = config
         self.data_path = data_path
@@ -78,12 +83,13 @@ class Dataset:
             labels_encoded = self.category_encoder(labels)
 
             audio, sr = librosa.load(
-                self.data_path / "train_audio" / filename, sr=self.config.sample_rate
+                self.data_path / "train_audio" / filename,
+                sr=self.config.sample_rate,
             )
             spectrogram = librosa.feature.melspectrogram(
                 y=audio,
                 sr=sr,
-                n_mels=self.config.num_mels,
+                n_mels=self.config.n_mels,
                 n_fft=self.config.n_fft,
                 hop_length=self.config.hop_length,
                 win_length=self.config.window_length,
@@ -91,7 +97,9 @@ class Dataset:
             log_spectrogram = librosa.power_to_db(spectrogram, ref=np.max)
 
             yield Sample(
-                audio=audio, mel_spectrogram=log_spectrogram, labels=labels_encoded
+                audio=audio,
+                mel_spectrogram=log_spectrogram,
+                labels=labels_encoded,
             )
 
     @property
@@ -103,3 +111,7 @@ class Dataset:
     def validate(self):
         """Validation dataset."""
         return self._validate
+
+    @property
+    def test(self):
+        raise NotImplementedError
