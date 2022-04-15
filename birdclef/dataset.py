@@ -1,8 +1,8 @@
 """BirdCLEF Dataset"""
 import json
+import random
 import typing
 from pathlib import Path
-from random import random
 
 import librosa
 import numpy as np
@@ -29,6 +29,8 @@ class Dataset:
     def __init__(self, config: Config, data_path: Path):
         self.config = config
         self.data_path = data_path
+        self.max_audio_length = self.config.sample_rate * self.config.max_audio_secs
+        self.max_spec_length = 751
 
         self.train_meta = pd.read_csv(data_path / "train_metadata.csv")
         self.test_data = pd.read_csv(data_path / "test.csv")
@@ -36,10 +38,10 @@ class Dataset:
         self.sample_submission = pd.read_csv(data_path / "sample_submission.csv")
 
         self.labels = set(self.train_meta["primary_label"].values)
-        self.labels += set(self.train_meta["secondary_label"].values)
+        self.labels.update(set(self.train_meta["secondary_labels"].values))
         self.label_map = {v: k for k, v in enumerate(self.labels)}
 
-        self.category_encoder = tf.keras.layers.CateogricalEncoding(
+        self.category_encoder = tf.keras.layers.CategoryEncoding(
             len(self.labels), "multi_hot"
         )
 
@@ -47,7 +49,7 @@ class Dataset:
             self.scored_birds = json.load(f)
 
         samples = self.train_meta[
-            ["primary_label", "secondary_label", "filename"]
+            ["primary_label", "secondary_labels", "filename"]
         ].values
 
         random.shuffle(samples)
@@ -65,27 +67,37 @@ class Dataset:
                 output_signature=Sample(
                     audio=tf.TensorSpec((None,), tf.float32),
                     mel_spectrogram=tf.TensorSpec(
-                        (None, self.config.num_mels), tf.float32
+                        (None, self.config.n_mels), tf.float32
                     ),
                     labels=tf.TensorSpec((None,), tf.int32),
                 ),
             )
-            .batch(self.config.batch_size)
+            .padded_batch(
+                self.config.batch_size,
+                padded_shapes=Sample(
+                    audio=tf.TensorShape((self.max_audio_length,)),
+                    mel_spectrogram=tf.TensorShape(
+                        (self.max_spec_length, self.config.n_mels)
+                    ),
+                    labels=tf.TensorShape((None,)),
+                ),
+            )
             .prefetch(tf.data.AUTOTUNE)
         )
 
     def generate(self, samples):
         """Generate a single batch from a collection of samples."""
-        for primary_label, secondary_label, filename in samples:
+        for primary_label, secondary_labels, filename in samples:
             primary_label = self.label_map[primary_label]
-            secondary_label = self.label_map[secondary_label]
-            labels = [primary_label] + secondary_label
+            secondary_labels = [self.label_map.get(label) for label in secondary_labels]
+            labels = [primary_label] + [label for label in secondary_labels if label]
             labels_encoded = self.category_encoder(labels)
 
             audio, sr = librosa.load(
                 self.data_path / "train_audio" / filename,
                 sr=self.config.sample_rate,
             )
+
             spectrogram = librosa.feature.melspectrogram(
                 y=audio,
                 sr=sr,
@@ -96,9 +108,13 @@ class Dataset:
             )
             log_spectrogram = librosa.power_to_db(spectrogram, ref=np.max)
 
+            # toss out longbois
+            if log_spectrogram.shape[1] > self.max_spec_length:
+                continue
+
             yield Sample(
                 audio=audio,
-                mel_spectrogram=log_spectrogram,
+                mel_spectrogram=log_spectrogram.transpose(),
                 labels=labels_encoded,
             )
 

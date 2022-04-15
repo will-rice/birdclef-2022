@@ -45,7 +45,7 @@ class SubsamplingConv1D(keras.layers.Layer):
             activation=activation,
         )
 
-    def call(self, inputs: tf.Tensor) -> tf.Tensor:
+    def call(self, inputs: tf.Tensor, training: bool = False) -> tf.Tensor:
         """Forward Pass."""
         out = self.conv_1(inputs)
         out = self.conv_2(out)
@@ -70,7 +70,7 @@ class GatedLinearUnit(keras.layers.Layer):
     def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
-    def call(self, inputs: Tensor) -> Tensor:
+    def call(self, inputs: Tensor, training: bool = False) -> Tensor:
         """Forward Pass."""
         linear, gated = tf.split(value=inputs, num_or_size_splits=2, axis=-1)
         return linear * tf.nn.sigmoid(gated)
@@ -85,7 +85,7 @@ class DepthwiseConv1D(keras.layers.Layer):
             kernel_size=(kernel_size, 1), padding="same"
         )
 
-    def call(self, inputs: Tensor) -> Tensor:
+    def call(self, inputs: Tensor, training: bool = False) -> Tensor:
         """Forward Pass."""
         out = tf.expand_dims(inputs, -1)
         out = self.conv(out)
@@ -523,7 +523,7 @@ class ConformerEncoder(keras.layers.Layer):
         training: Optional[bool] = False,
     ) -> Tensor:
         """Forward Pass."""
-        out = self.subsampling_layer(inputs)
+        out = self.subsampling_layer(inputs, training=training)
         out = self.linear_proj(out)
         out = self.dropout(out, training=training)
 

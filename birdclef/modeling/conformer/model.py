@@ -2,7 +2,6 @@ from typing import Any, Optional
 
 import tensorflow as tf
 from tensorflow import Tensor
-from transformers import TFViTModel
 
 from birdclef.modeling.conformer.config import ConformerConfig
 from birdclef.modeling.conformer.layers import ConformerEncoder
@@ -23,7 +22,7 @@ class Conformer(tf.keras.Model):
             depthwise_kernel_size=config.depthwise_kernel_size,
         )
         self.flatten = tf.keras.layers.Flatten()
-        self.head = tf.keras.layers.Dense(units=config.num_classes)
+        self.head = tf.keras.layers.Dense(units=config.num_classes, name="head")
 
     def call(
         self,

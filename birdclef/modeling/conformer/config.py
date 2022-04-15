@@ -24,6 +24,10 @@ from birdclef.modeling.config import Config
 class ConformerConfig(Config):
     """Conformer Config."""
 
+    # Training
+    batch_size: int = 64
+    steps_per_checkpoint = 1000
+
     # Encoder
     encoder_num_layers: int = 16
     encoder_units: int = 144
@@ -32,7 +36,7 @@ class ConformerConfig(Config):
     feed_forward_expansion_factor: int = 4
     attention_dropout: float = 0.1
     depthwise_kernel_size: int = 32
-    num_classes: int = 103
+    num_classes: int = 425
 
     # Preprocessing
     max_audio_secs: int = 10
