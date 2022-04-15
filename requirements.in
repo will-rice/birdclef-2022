@@ -1,0 +1,7 @@
+# Formatting
+isort
+black
+# Dependencies
+pip-tools
+# Modeling
+sklearn
