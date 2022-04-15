@@ -39,6 +39,8 @@ class Dataset:
 
         self.labels = set(self.train_meta["primary_label"].values)
         self.labels.update(set(self.train_meta["secondary_labels"].values))
+        self.labels = list(self.labels)
+        self.labels += ["nocall"]
         self.label_map = {v: k for k, v in enumerate(self.labels)}
 
         self.category_encoder = tf.keras.layers.CategoryEncoding(
@@ -91,6 +93,10 @@ class Dataset:
             primary_label = self.label_map[primary_label]
             secondary_labels = [self.label_map.get(label) for label in secondary_labels]
             labels = [primary_label] + [label for label in secondary_labels if label]
+
+            if random.random() < 0.6:
+                labels += [self.label_map.get("nocall")]
+
             labels_encoded = self.category_encoder(labels)
 
             audio, sr = librosa.load(
