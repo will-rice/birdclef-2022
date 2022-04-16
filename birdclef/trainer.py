@@ -103,7 +103,7 @@ class Trainer:
         tf.saved_model.save(self.model, str(self.log_dir / "model"))
 
         with open(self.log_dir / "labels.json") as file:
-            json.dumps(self.dataset.label_map)
+            json.dump(self.dataset.label_map, file)
 
     def test(self):
         """Run model testing."""
