@@ -1,4 +1,7 @@
 """BirdCLEF Trainer."""
+import json
+from pathlib import Path
+
 import tensorflow as tf
 import wandb
 from sklearn import metrics
@@ -9,7 +12,7 @@ from birdclef.dataset import Dataset
 class Trainer:
     """Simple model trainer."""
 
-    def __init__(self, config, model: tf.keras.Model, dataset: Dataset, log_dir: str):
+    def __init__(self, config, model: tf.keras.Model, dataset: Dataset, log_dir: Path):
         self.config = config
         self.model = model
         self.dataset = dataset
@@ -97,7 +100,10 @@ class Trainer:
                 "val_f1_score": self.val_f1_score.result(),
             }
         )
-        tf.saved_model.save(self.model, self.log_dir)
+        tf.saved_model.save(self.model, str(self.log_dir / "model"))
+
+        with open(self.log_dir / "labels.json") as file:
+            json.dumps(self.dataset.label_map)
 
     def test(self):
         """Run model testing."""

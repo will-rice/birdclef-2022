@@ -25,7 +25,7 @@ class ConformerConfig(Config):
     """Conformer Config."""
 
     # Training
-    batch_size: int = 64
+    batch_size: int = 32
     steps_per_checkpoint = 1000
 
     # Encoder
