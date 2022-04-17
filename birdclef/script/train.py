@@ -33,7 +33,7 @@ def main():
         config=config,
         model=model,
         dataset=dataset,
-        log_dir=str(log_path),
+        log_dir=log_path,
     )
 
     wandb.init(
