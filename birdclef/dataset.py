@@ -30,7 +30,7 @@ class Dataset:
         self.config = config
         self.data_path = data_path
         self.max_audio_length = self.config.sample_rate * self.config.max_audio_secs
-        self.max_spec_length = 1251
+        self.max_spec_length = 313
 
         self.train_meta = pd.read_csv(data_path / "train_metadata.csv")
         self.test_data = pd.read_csv(data_path / "test.csv")

@@ -40,7 +40,7 @@ class ConformerConfig(Config):
 
     # Preprocessing
     max_audio_secs: int = 5
-    sample_rate: int = 32000
+    sample_rate: int = 16000
     num_mels: int = 80
     n_fft: int = 1024
     window_size: int = 512
