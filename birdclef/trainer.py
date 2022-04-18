@@ -42,8 +42,6 @@ class Trainer:
             grads = tape.gradient(loss_value, self.model.trainable_weights)
             self.optimizer.apply_gradients(zip(grads, self.model.trainable_weights))
 
-            print(tf.cast(batch.labels, tf.float32).shape)
-            print(tf.cast(tf.argmax(tf.nn.softmax(logits)), tf.float32).shape)
             f1_score = metrics.f1_score(
                 tf.cast(batch.labels, tf.float32),
                 tf.cast(tf.argmax(tf.nn.softmax(logits), -1), tf.float32),
