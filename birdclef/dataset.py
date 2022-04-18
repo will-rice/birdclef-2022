@@ -72,7 +72,7 @@ class Dataset:
                     mel_spectrogram=tf.TensorSpec(
                         (None, self.config.n_mels), tf.float32
                     ),
-                    labels=tf.TensorSpec((None,), tf.int32),
+                    labels=tf.TensorSpec((), tf.int32),
                 ),
             )
             .padded_batch(
@@ -82,7 +82,7 @@ class Dataset:
                     mel_spectrogram=tf.TensorShape(
                         (self.max_spec_length, self.config.n_mels)
                     ),
-                    labels=tf.TensorShape((None,)),
+                    labels=tf.TensorShape(()),
                 ),
             )
             .prefetch(tf.data.AUTOTUNE)
