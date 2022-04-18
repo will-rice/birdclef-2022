@@ -17,8 +17,8 @@ class Trainer:
         self.model = model
         self.dataset = dataset
         self.log_dir = log_dir
-        self.loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-        self.metric_fn = tf.keras.metrics.SparseCategoricalAccuracy()
+        self.loss_fn = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+        self.metric_fn = tf.keras.metrics.CategoricalAccuracy()
         self.train_loss = tf.keras.metrics.Mean()
         self.train_accuracy = tf.keras.metrics.Mean()
         self.train_f1_score = tf.keras.metrics.Mean()
