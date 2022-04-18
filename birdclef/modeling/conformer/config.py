@@ -36,7 +36,7 @@ class ConformerConfig(Config):
     feed_forward_expansion_factor: int = 4
     attention_dropout: float = 0.1
     depthwise_kernel_size: int = 32
-    num_classes: int = 21
+    num_classes: int = 22
 
     # Preprocessing
     max_audio_secs: int = 5
