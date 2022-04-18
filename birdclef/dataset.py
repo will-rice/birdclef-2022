@@ -43,7 +43,8 @@ class Dataset:
         # self.labels = set(self.train_meta["primary_label"].values)
         # self.labels.update(set(self.train_meta["secondary_labels"].values))
         self.labels = list(self.scored_birds)
-        self.labels += ["nocall"]
+        # nocall should be 0
+        self.labels = ["nocall"] + self.labels
         self.label_map = {v: k for k, v in enumerate(self.labels)}
 
         self.category_encoder = tf.keras.layers.CategoryEncoding(
@@ -90,7 +91,7 @@ class Dataset:
     def generate(self, samples):
         """Generate a single batch from a collection of samples."""
         for primary_label, secondary_labels, filename in samples:
-            primary_label = self.label_map.get(primary_label, "nocall")
+            primary_label = self.label_map.get(primary_label, 0)
 
             labels_encoded = self.category_encoder(primary_label)
 
