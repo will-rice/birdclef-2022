@@ -17,8 +17,8 @@ class Trainer:
         self.model = model
         self.dataset = dataset
         self.log_dir = log_dir
-        self.loss_fn = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
-        self.metric_fn = tf.keras.metrics.CategoricalAccuracy()
+        self.loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        self.metric_fn = tf.keras.metrics.SparseCategoricalAccuracy()
         self.train_loss = tf.keras.metrics.Mean()
         self.train_accuracy = tf.keras.metrics.Mean()
         self.train_f1_score = tf.keras.metrics.Mean()
@@ -43,8 +43,8 @@ class Trainer:
             self.optimizer.apply_gradients(zip(grads, self.model.trainable_weights))
 
             f1_score = metrics.f1_score(
-                tf.cast(tf.argmax(batch.labels), tf.float32),
-                tf.cast(tf.nn.softmax(logits), tf.float32),
+                tf.cast(batch.labels, tf.float32),
+                tf.cast(tf.argmax(tf.nn.softmax(logits)), tf.float32),
                 labels=None,
                 average="macro",
                 zero_division=1,
@@ -82,8 +82,8 @@ class Trainer:
             val_accuracy = self.metric_fn(batch.labels, logits)
 
             f1_score = metrics.f1_score(
-                tf.cast(tf.argmax(batch.labels), tf.float32),
-                tf.cast(tf.nn.softmax(logits), tf.float32),
+                tf.cast(batch.labels, tf.float32),
+                tf.cast(tf.argmax(tf.nn.softmax(logits)), tf.float32),
                 labels=None,
                 average="macro",
                 zero_division=1,

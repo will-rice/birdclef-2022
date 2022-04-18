@@ -92,9 +92,6 @@ class Dataset:
         """Generate a single batch from a collection of samples."""
         for primary_label, secondary_labels, filename in samples:
             primary_label = self.label_map.get(primary_label, 0)
-
-            labels_encoded = self.category_encoder(primary_label)
-
             audio, sr = librosa.load(
                 self.data_path / "train_audio" / filename,
                 sr=self.config.sample_rate,
@@ -117,7 +114,7 @@ class Dataset:
             yield Sample(
                 audio=audio,
                 mel_spectrogram=log_spectrogram.transpose(),
-                labels=labels_encoded,
+                labels=primary_label,
             )
 
     @property
