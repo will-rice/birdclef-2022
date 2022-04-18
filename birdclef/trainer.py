@@ -43,7 +43,7 @@ class Trainer:
             self.optimizer.apply_gradients(zip(grads, self.model.trainable_weights))
 
             f1_score = metrics.f1_score(
-                tf.cast(batch.labels, tf.float32),
+                tf.cast(tf.argmax(batch.labels), tf.float32),
                 tf.cast(tf.nn.softmax(logits), tf.float32),
                 labels=None,
                 average="macro",
@@ -82,7 +82,7 @@ class Trainer:
             val_accuracy = self.metric_fn(batch.labels, logits)
 
             f1_score = metrics.f1_score(
-                tf.cast(batch.labels, tf.float32),
+                tf.cast(tf.argmax(batch.labels), tf.float32),
                 tf.cast(tf.nn.softmax(logits), tf.float32),
                 labels=None,
                 average="macro",
