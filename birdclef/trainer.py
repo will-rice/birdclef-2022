@@ -17,8 +17,8 @@ class Trainer:
         self.model = model
         self.dataset = dataset
         self.log_dir = log_dir
-        self.loss_fn = tf.keras.losses.BinaryCrossentropy(from_logits=True)
-        self.metric_fn = tf.keras.metrics.BinaryAccuracy()
+        self.loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
+        self.metric_fn = tf.keras.metrics.SparseCategoricalAccuracy()
         self.train_loss = tf.keras.metrics.Mean()
         self.train_accuracy = tf.keras.metrics.Mean()
         self.train_f1_score = tf.keras.metrics.Mean()
@@ -44,7 +44,7 @@ class Trainer:
 
             f1_score = metrics.f1_score(
                 tf.cast(batch.labels, tf.float32),
-                tf.cast(tf.math.round(tf.nn.sigmoid(logits)), tf.float32),
+                tf.cast(tf.nn.softmax(logits), tf.float32),
                 labels=None,
                 average="macro",
                 zero_division=1,
@@ -83,7 +83,7 @@ class Trainer:
 
             f1_score = metrics.f1_score(
                 tf.cast(batch.labels, tf.float32),
-                tf.cast(tf.math.round(tf.nn.sigmoid(logits)), tf.float32),
+                tf.cast(tf.nn.softmax(logits), tf.float32),
                 labels=None,
                 average="macro",
                 zero_division=1,

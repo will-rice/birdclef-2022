@@ -37,18 +37,18 @@ class Dataset:
         self.ebird_data = pd.read_csv(data_path / "eBird_Taxonomy_v2021.csv")
         self.sample_submission = pd.read_csv(data_path / "sample_submission.csv")
 
-        self.labels = set(self.train_meta["primary_label"].values)
-        self.labels.update(set(self.train_meta["secondary_labels"].values))
-        self.labels = list(self.labels)
+        with open(data_path / "scored_birds.json") as f:
+            self.scored_birds = json.load(f)
+
+        # self.labels = set(self.train_meta["primary_label"].values)
+        # self.labels.update(set(self.train_meta["secondary_labels"].values))
+        self.labels = list(self.scored_birds)
         self.labels += ["nocall"]
         self.label_map = {v: k for k, v in enumerate(self.labels)}
 
         self.category_encoder = tf.keras.layers.CategoryEncoding(
-            len(self.labels), "multi_hot"
+            len(self.labels), "one_hot"
         )
-
-        with open(data_path / "scored_birds.json") as f:
-            self.scored_birds = json.load(f)
 
         samples = self.train_meta[
             ["primary_label", "secondary_labels", "filename"]
@@ -90,14 +90,9 @@ class Dataset:
     def generate(self, samples):
         """Generate a single batch from a collection of samples."""
         for primary_label, secondary_labels, filename in samples:
-            primary_label = self.label_map[primary_label]
-            secondary_labels = [self.label_map.get(label) for label in secondary_labels]
-            labels = [primary_label] + [label for label in secondary_labels if label]
+            primary_label = self.label_map.get(primary_label, "nocall")
 
-            if random.random() < 0.6:
-                labels += [self.label_map.get("nocall")]
-
-            labels_encoded = self.category_encoder(labels)
+            labels_encoded = self.category_encoder(primary_label)
 
             audio, sr = librosa.load(
                 self.data_path / "train_audio" / filename,
